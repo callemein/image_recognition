@@ -66,7 +66,7 @@ bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recog
   cv::Mat overlayed_image;
 
   ros::Time start = ros::Time::now();
-  if (!g_openpose_wrapper->detectPoses(image, recognitions, overlayed_image))
+  if (!g_openpose_wrapper->detectPoses(image, recognitions, overlayed_image)) // GROUP_ID = POSE_ID , LABEL=PART_ID
   {
     ROS_ERROR("g_openpose_wrapper_->detectPoses failed!");
     return false;
@@ -78,7 +78,7 @@ bool detectPoses(const cv::Mat& image, std::vector<image_recognition_msgs::Recog
   {
     std::string output_filepath = g_save_images_folder + "/" + getTimeAsString("%Y-%m-%d-%H-%M-%S") + "_openpose_ros.jpg";
     ROS_INFO("Writing output to %s", output_filepath.c_str());
-    cv::imwrite(output_filepath, overlayed_image);
+    cv::imwrite(output_filepath, image);
   }
 
   // Publish to topic
@@ -112,7 +112,7 @@ bool detectPosesCallback(image_recognition_msgs::Recognize::Request& req, image_
   cv_bridge::CvImagePtr cv_ptr;
   try
   {
-    cv_ptr = cv_bridge::toCvCopy(req.image, req.image.encoding);
+    cv_ptr = cv_bridge::toCvCopy(req.image, "bgr8");
   }
   catch (cv_bridge::Exception& e)
   {
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 
   if (local_nh.hasParam("save_images_folder"))
   {
-    g_save_images_folder = getParam(local_nh, "save_images_folder", std::string("/tmp"));
+    g_save_images_folder = getParam(local_nh, "save_images_folder", std::string("/htmp"));
   }
   g_publish_to_topic = getParam(local_nh, "publish_result", true);
 

@@ -5,15 +5,20 @@ project(openpose_ros)
 add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  cv_bridge
-  sensor_msgs
-  image_recognition_msgs
-)
+        roscpp
+        cv_bridge
+        sensor_msgs
+        image_recognition_msgs
+        )
 
+
+find_package(OpenCV 3.2 REQUIRED)
+
+message(${OpenCV_INCLUDE_DIRS})
+message(${OpenCV_LIBRARIES})
 catkin_package()
 
-set(OPENPOSE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/openpose)
+set(OPENPOSE_DIR ~/openpose)
 IF(EXISTS ${OPENPOSE_DIR})
   message("Using openpose from " ${OPENPOSE_DIR} " ...")
 
@@ -28,9 +33,10 @@ IF(EXISTS ${OPENPOSE_DIR})
   add_definitions(-DUSE_CAFFE)
 
   include_directories(
-    ${catkin_INCLUDE_DIRS}
-    ${CAFFE_INCLUDE_DIRS}
-    ${OPENPOSE_INCLUDE_DIRS}
+      ${catkin_INCLUDE_DIRS}
+      ${OpenCV_INCLUDE_DIRS}
+      ${CAFFE_INCLUDE_DIRS}
+      ${OPENPOSE_INCLUDE_DIRS}
   )
 
   add_library(openpose_wrapper src/openpose_wrapper.cpp)
@@ -42,14 +48,14 @@ IF(EXISTS ${OPENPOSE_DIR})
   )
 
   add_executable(${PROJECT_NAME}_test test/test.cpp)
-  target_link_libraries(${PROJECT_NAME}_test openpose_wrapper)
+  target_link_libraries(${PROJECT_NAME}_test openpose_wrapper ${OpenCV_LIBRARIES})
 else()
   message(WARNING "Openpose folder not found in " ${OPENPOSE_DIR} " using a mock instead ...")
 
   include_directories(${catkin_INCLUDE_DIRS})
   add_library(openpose_wrapper src/openpose_wrapper_mock.cpp)
 
-  target_link_libraries(openpose_wrapper ${catkin_LIBRARIES})
+  target_link_libraries(openpose_wrapper ${catkin_LIBRARIES}  ${OpenCV_LIBRARIES})
 endif()
 
 # depend on generated messages
@@ -58,4 +64,4 @@ add_dependencies(openpose_wrapper ${catkin_EXPORTED_TARGETS})
 add_executable(${PROJECT_NAME}_node src/openpose_ros_node.cpp)
 
 # Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_node openpose_wrapper)
+target_link_libraries(${PROJECT_NAME}_node openpose_wrapper ${OpenCV_LIBRARIES})

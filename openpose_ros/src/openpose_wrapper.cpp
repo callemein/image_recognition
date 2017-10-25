@@ -64,7 +64,7 @@ OpenposeWrapper::OpenposeWrapper(const cv::Size& net_input_size, const cv::Size&
   scale_gap_(scale_gap),
   bodypart_map_(getBodyPartMapFromPoseModel(stringToPoseModel(pose_model)))
 {
-  op::ConfigureLog::setPriorityThreshold(op::Priority::High); 
+  op::ConfigureLog::setPriorityThreshold(op::Priority::High);
 
   op::Point<int> op_net_input_size(net_input_size_.width, net_input_size_.height);
   op::Point<int> op_net_output_size(net_output_size_.width, net_output_size_.height);
@@ -94,6 +94,7 @@ bool OpenposeWrapper::detectPoses(const cv::Mat& image, std::vector<image_recogn
   op::CvMatToOpInput cv_mat_to_input(op_net_input_size, (int) num_scales_, scale_gap_);
   op::Array<float> net_input_array;
   std::vector<float> scale_ratios;
+
   std::tie(net_input_array, scale_ratios) = cv_mat_to_input.format(image);
 
   ROS_INFO("OpenposeWrapper::detectPoses: Net input size: [%d x %d]", op_net_input_size.x, op_net_input_size.y);
@@ -144,7 +145,10 @@ bool OpenposeWrapper::detectPoses(const cv::Mat& image, std::vector<image_recogn
       recognitions[index].roi.width = 1;
       recognitions[index].roi.height = 1;
       recognitions[index].categorical_distribution.probabilities.resize(1);
-      recognitions[index].categorical_distribution.probabilities.front().label = bodypart_map_[bodypart_idx];
+
+      std::stringstream str_bodypart_idx;
+      str_bodypart_idx << bodypart_idx;
+      recognitions[index].categorical_distribution.probabilities.front().label = str_bodypart_idx.str();
 
       recognitions[index].roi.x_offset = pose_keypoints[3 * index] * scale_factor;
       recognitions[index].roi.y_offset = pose_keypoints[3 * index + 1] * scale_factor;
@@ -154,4 +158,3 @@ bool OpenposeWrapper::detectPoses(const cv::Mat& image, std::vector<image_recogn
 
   return true;
 }
-
