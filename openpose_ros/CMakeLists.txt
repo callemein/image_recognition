@@ -18,7 +18,7 @@ message(${OpenCV_INCLUDE_DIRS})
 message(${OpenCV_LIBRARIES})
 catkin_package()
 
-set(OPENPOSE_DIR ~/openpose)
+set(OPENPOSE_DIR $ENV{HOME}/openpose)
 IF(EXISTS ${OPENPOSE_DIR})
   message("Using openpose from " ${OPENPOSE_DIR} " ...")
 
